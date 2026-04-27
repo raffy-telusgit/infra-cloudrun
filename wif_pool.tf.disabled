@@ -1,0 +1,43 @@
+# DISABLED: Requires iam.workloadIdentityPools.create permission
+# Rename this file to wif_pool.tf once an admin creates the WIF pool
+# OR once you have the iam.workloadIdentityPoolAdmin role.
+#
+# If admin creates the pool manually via gcloud, import into state with:
+#   terraform import google_iam_workload_identity_pool.github projects/raffy-cicd-lab-bf9b4f/locations/global/workloadIdentityPools/github-pool
+#   terraform import google_iam_workload_identity_pool_provider.github projects/raffy-cicd-lab-bf9b4f/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+
+resource "google_iam_workload_identity_pool" "github" {
+  workload_identity_pool_id = "github-pool"
+  display_name              = "GitHub Actions Pool"
+}
+
+resource "google_iam_workload_identity_pool_provider" "github" {
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
+  workload_identity_pool_provider_id = "github-provider"
+  display_name                       = "GitHub Actions Provider"
+
+  attribute_mapping = {
+    "google.subject"       = "assertion.sub"
+    "attribute.repository" = "assertion.repository"
+    "attribute.actor"      = "assertion.actor"
+  }
+
+  attribute_condition = "assertion.repository_owner == \"${var.github_owner}\""
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
+# WIF bindings for both repos
+resource "google_service_account_iam_member" "wif_hello_world_app" {
+  service_account_id = google_service_account.github_actions.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_owner}/hello-world-app"
+}
+
+resource "google_service_account_iam_member" "wif_infra_cloudrun" {
+  service_account_id = google_service_account.github_actions.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_owner}/infra-cloudrun"
+}

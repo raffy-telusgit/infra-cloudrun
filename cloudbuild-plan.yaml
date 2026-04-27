@@ -1,0 +1,37 @@
+steps:
+  # Step 1: Install Terraform
+  - name: 'hashicorp/terraform:1.9'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - 'terraform version'
+
+  # Step 2: Terraform Init with environment-specific backend
+  - name: 'hashicorp/terraform:1.9'
+    args:
+      - 'init'
+      - '-backend-config=environments/${_ENV}.backend.hcl'
+
+  # Step 3: Terraform Format Check
+  - name: 'hashicorp/terraform:1.9'
+    args:
+      - 'fmt'
+      - '-check'
+      - '-recursive'
+
+  # Step 4: Terraform Validate
+  - name: 'hashicorp/terraform:1.9'
+    args:
+      - 'validate'
+
+  # Step 5: Terraform Plan (no apply)
+  - name: 'hashicorp/terraform:1.9'
+    args:
+      - 'plan'
+      - '-var-file=environments/${_ENV}.tfvars'
+
+substitutions:
+  _ENV: 'np'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

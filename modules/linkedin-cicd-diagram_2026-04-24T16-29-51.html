@@ -1,0 +1,610 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI/CD Pipeline — LinkedIn Diagram (Light Mode)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 32px 20px;
+        }
+
+        /* CARD */
+        .card {
+            width: 100%;
+            max-width: 860px;
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-radius: 20px;
+            padding: 36px 40px 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+
+        /* Background glow blobs */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -80px; left: -80px;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(31,111,235,0.07) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; right: -60px;
+            width: 260px; height: 260px;
+            background: radial-gradient(circle, rgba(137,87,229,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* TITLE */
+        .title-row {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .title-row h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+        .title-row .tagline {
+            font-size: 0.75rem;
+            color: #57606a;
+            font-weight: 500;
+        }
+        .tech-pills {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .tech-pill {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #57606a;
+        }
+
+        /* FLOW */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* CONNECTOR */
+        .conn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .conn-line { width: 2px; background: #d0d7de; }
+        .conn-arrow {
+            width: 0; height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 9px solid #d0d7de;
+        }
+        .conn-text {
+            font-size: 0.58rem;
+            color: #57606a;
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            padding: 1px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+            margin: 2px 0;
+        }
+
+        /* ROWS */
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            width: 100%;
+        }
+        .row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+
+        /* NODE */
+        .node {
+            border-radius: 14px;
+            padding: 14px 16px;
+            text-align: center;
+        }
+        .node .n-icon { font-size: 1.6rem; margin-bottom: 6px; }
+        .node .n-title { font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; }
+        .node .n-sub { font-size: 0.62rem; line-height: 1.5; }
+
+        /* LIGHT THEMES */
+        .t-repo-infra {
+            background: #dbeafe;
+            border: 1.5px solid #3b82f6;
+        }
+        .t-repo-infra .n-title { color: #1d4ed8; }
+        .t-repo-infra .n-sub { color: #374151; }
+
+        .t-repo-app {
+            background: #dcfce7;
+            border: 1.5px solid #22c55e;
+        }
+        .t-repo-app .n-title { color: #15803d; }
+        .t-repo-app .n-sub { color: #374151; }
+
+        .t-cloudbuild {
+            background: #eff6ff;
+            border: 1.5px solid #60a5fa;
+        }
+        .t-cloudbuild .n-title { color: #1d4ed8; }
+        .t-cloudbuild .n-sub { color: #374151; }
+
+        .t-registry {
+            background: #f0fdf4;
+            border: 1.5px solid #4ade80;
+        }
+        .t-registry .n-title { color: #15803d; }
+        .t-registry .n-sub { color: #374151; }
+
+        .t-deploy {
+            background: #faf5ff;
+            border: 1.5px solid #a855f7;
+        }
+        .t-deploy .n-title { color: #7e22ce; }
+        .t-deploy .n-sub { color: #374151; }
+
+        .t-vpc {
+            background: #ecfeff;
+            border: 1.5px solid #22d3ee;
+        }
+        .t-vpc .n-title { color: #0e7490; }
+        .t-vpc .n-sub { color: #374151; }
+
+        /* ENV NODES */
+        .env-node {
+            border-radius: 12px;
+            padding: 12px 10px;
+            text-align: center;
+        }
+        .env-node .e-icon { font-size: 1.3rem; margin-bottom: 4px; }
+        .env-node .e-name { font-size: 0.75rem; font-weight: 800; margin-bottom: 4px; }
+        .env-node .e-steps { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+
+        .t-dev { background: #f0fdf4; border: 1.5px solid #22c55e; }
+        .t-dev .e-name { color: #15803d; }
+        .t-staging { background: #fefce8; border: 1.5px solid #eab308; }
+        .t-staging .e-name { color: #a16207; }
+        .t-prod { background: #fff1f2; border: 1.5px solid #f43f5e; }
+        .t-prod .e-name { color: #be123c; }
+
+        /* STEP PILLS */
+        .spill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.58rem;
+            font-weight: 700;
+        }
+        .sp-auto { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .sp-canary { background: #f3e8ff; color: #7e22ce; border: 1px solid #c084fc; }
+        .sp-gate { background: #ffe4e6; color: #be123c; border: 1px solid #fda4af; }
+        .sp-stable { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+        .sp-manual { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+
+        /* BRANCH LINES */
+        .branch-wrap {
+            width: 100%;
+            position: relative;
+            height: 28px;
+        }
+        .bh { position: absolute; top: 0; left: 16%; right: 16%; height: 2px; background: #d0d7de; }
+        .bv-l { position: absolute; top: 0; left: 16%; width: 2px; height: 28px; background: #d0d7de; }
+        .bv-c { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 2px; height: 28px; background: #d0d7de; }
+        .bv-r { position: absolute; top: 0; right: 16%; width: 2px; height: 28px; background: #d0d7de; }
+        .ba {
+            position: absolute;
+            bottom: 0;
+            width: 0; height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 9px solid #d0d7de;
+            transform: translateX(-50%);
+        }
+
+        /* SMALL CONNECTOR */
+        .sc { display: flex; flex-direction: column; align-items: center; }
+        .sl { width: 2px; height: 10px; background: #d0d7de; }
+        .sa { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid #d0d7de; }
+
+        /* PROMOTE LABELS */
+        .promote-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            margin-top: 6px;
+        }
+        .promote-cell {
+            text-align: center;
+            font-size: 0.55rem;
+            color: #7e22ce;
+            font-weight: 600;
+        }
+
+        /* MODULE TAGS */
+        .mod-tag {
+            display: inline-block;
+            background: #ede9fe;
+            border: 1px solid #c4b5fd;
+            border-radius: 6px;
+            padding: 1px 6px;
+            font-size: 0.55rem;
+            font-weight: 700;
+            color: #6d28d9;
+            margin: 2px 2px 0;
+        }
+
+        /* FOOTER */
+        .footer {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            border-top: 1px solid #e1e4e8;
+            padding-top: 14px;
+        }
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .footer-badge {
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 3px 9px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #57606a;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .footer-right {
+            font-size: 0.6rem;
+            color: #8c959f;
+            font-style: italic;
+        }
+
+        /* LEGEND */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 14px;
+        }
+        .li { display: flex; align-items: center; gap: 5px; font-size: 0.6rem; color: #57606a; }
+        .ld { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+        /* DOWNLOAD BTN */
+        .btn-row {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .dl-btn {
+            background: #1d4ed8;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .dl-btn:hover { background: #2563eb; }
+        .dl-status {
+            font-size: 0.72rem;
+            color: #57606a;
+            margin-top: 8px;
+            min-height: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card" id="diagram-card">
+
+    <!-- TITLE -->
+    <div class="title-row">
+        <h1>🚀 Production CI/CD Pipeline</h1>
+        <p class="tagline">Two-Repo · Cloud Build · Cloud Deploy · Canary Deployments · Modular Terraform IaC</p>
+        <div class="tech-pills">
+            <span class="tech-pill">☁️ Google Cloud Run</span>
+            <span class="tech-pill">🐦 Cloud Deploy</span>
+            <span class="tech-pill">⚙️ Cloud Build</span>
+            <span class="tech-pill">🏗️ Terraform (Modular)</span>
+            <span class="tech-pill">🐳 Docker</span>
+            <span class="tech-pill">🟦 TypeScript</span>
+            <span class="tech-pill">🌐 Private VPC</span>
+        </div>
+    </div>
+
+    <div class="flow">
+
+        <!-- REPOS -->
+        <div class="row-2" style="max-width:700px;">
+            <div class="node t-repo-infra">
+                <div class="n-icon">🏗️</div>
+                <div class="n-title">infra-cloudrun</div>
+                <div class="n-sub">
+                    Modular Terraform IaC<br>
+                    <span class="mod-tag">networking</span>
+                    <span class="mod-tag">cloud-run</span>
+                    <span class="mod-tag">cloud-deploy</span>
+                    <span class="mod-tag">cloud-build</span>
+                    <span class="mod-tag">iam</span>
+                </div>
+            </div>
+            <div class="node t-repo-app">
+                <div class="n-icon">🟦</div>
+                <div class="n-title">hello-world-app</div>
+                <div class="n-sub">
+                    TypeScript Express API<br>
+                    Dockerfile · cloudbuild.yaml<br>
+                    skaffold.yaml · Knative manifests
+                </div>
+            </div>
+        </div>
+
+        <!-- CONNECTOR -->
+        <div class="conn">
+            <div class="conn-line" style="height:14px;"></div>
+            <div class="conn-text">git push → Cloud Build triggers automatically</div>
+            <div class="conn-line" style="height:10px;"></div>
+            <div class="conn-arrow"></div>
+        </div>
+
+        <!-- CLOUD BUILD TRIGGERS -->
+        <div class="row-2" style="max-width:700px;">
+            <div class="node t-cloudbuild">
+                <div class="n-icon">⚙️</div>
+                <div class="n-title">Infra Cloud Build Trigger</div>
+                <div class="n-sub">
+                    <span style="color:#6d28d9;font-weight:700;">feature branch</span> → terraform plan<br>
+                    <span style="color:#a16207;font-weight:700;">np branch</span> → terraform apply (np)<br>
+                    <span style="color:#15803d;font-weight:700;">pr branch</span> → terraform apply (prod)
+                </div>
+            </div>
+            <div class="node t-cloudbuild">
+                <div class="n-icon">⚙️</div>
+                <div class="n-title">App Cloud Build Trigger</div>
+                <div class="n-sub">
+                    Push to main → auto-fires<br>
+                    ① Docker build (git SHA tag)<br>
+                    ② Push to Artifact Registry<br>
+                    ③ Create Cloud Deploy release
+                </div>
+            </div>
+        </div>
+
+        <!-- CONNECTOR -->
+        <div class="conn">
+            <div class="conn-line" style="height:14px;"></div>
+            <div class="conn-text">image tagged with git SHA</div>
+            <div class="conn-line" style="height:10px;"></div>
+            <div class="conn-arrow"></div>
+        </div>
+
+        <!-- ARTIFACT REGISTRY -->
+        <div class="node t-registry" style="max-width:360px;width:100%;">
+            <div class="n-icon">📦</div>
+            <div class="n-title">Artifact Registry</div>
+            <div class="n-sub">Docker image repository<br>Versioned by git commit SHA</div>
+        </div>
+
+        <!-- CONNECTOR -->
+        <div class="conn">
+            <div class="conn-line" style="height:14px;"></div>
+            <div class="conn-text">Cloud Deploy release created · Skaffold renders Knative manifests</div>
+            <div class="conn-line" style="height:10px;"></div>
+            <div class="conn-arrow"></div>
+        </div>
+
+        <!-- CLOUD DEPLOY -->
+        <div class="node t-deploy" style="max-width:380px;width:100%;">
+            <div class="n-icon">🐦</div>
+            <div class="n-title">Cloud Deploy Pipeline</div>
+            <div class="n-sub">Canary strategy active · Approval gates configured<br>Skaffold renders per-environment manifests</div>
+        </div>
+
+        <!-- CONNECTOR to 3-way -->
+        <div class="conn">
+            <div class="conn-line" style="height:12px;"></div>
+            <div class="conn-text">auto-deploy to dev · manual promote to staging/prod</div>
+            <div class="conn-line" style="height:8px;"></div>
+        </div>
+
+        <!-- BRANCH LINES -->
+        <div class="branch-wrap" style="max-width:700px;width:100%;">
+            <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:2px;height:12px;background:#d0d7de;"></div>
+            <div class="bh"></div>
+            <div class="bv-l"></div>
+            <div class="bv-c"></div>
+            <div class="bv-r"></div>
+            <div class="ba" style="left:16%;"></div>
+            <div class="ba" style="left:50%;"></div>
+            <div class="ba" style="right:16%;left:auto;transform:translateX(50%);"></div>
+        </div>
+
+        <!-- 3 ENVIRONMENTS -->
+        <div class="row-3" style="max-width:700px;">
+
+            <!-- DEV -->
+            <div class="env-node t-dev">
+                <div class="e-icon">🟢</div>
+                <div class="e-name">DEV</div>
+                <div class="e-steps">
+                    <span class="spill sp-auto">⚡ Auto-deploy</span>
+                    <div class="sc"><div class="sl"></div><div class="sa"></div></div>
+                    <span class="spill sp-stable">✅ 100% Traffic</span>
+                    <div style="font-size:0.55rem;color:#6b7280;margin-top:4px;">No approval gate</div>
+                </div>
+                <div style="font-size:0.5rem;color:#9ca3af;margin-top:8px;font-family:monospace;">Cloud Run Service</div>
+            </div>
+
+            <!-- STAGING -->
+            <div class="env-node t-staging">
+                <div class="e-icon">🟡</div>
+                <div class="e-name">STAGING</div>
+                <div class="e-steps">
+                    <span class="spill sp-canary">🐦 25% Canary</span>
+                    <div class="sc"><div class="sl"></div><div class="sa"></div></div>
+                    <span class="spill sp-manual">👆 Manual Advance</span>
+                    <div class="sc"><div class="sl"></div><div class="sa"></div></div>
+                    <span class="spill sp-stable">✅ 100% Stable</span>
+                </div>
+                <div style="font-size:0.5rem;color:#9ca3af;margin-top:8px;font-family:monospace;">Cloud Run Service</div>
+            </div>
+
+            <!-- PROD -->
+            <div class="env-node t-prod">
+                <div class="e-icon">🔴</div>
+                <div class="e-name">PROD</div>
+                <div class="e-steps">
+                    <span class="spill sp-gate">🔐 Approval Gate</span>
+                    <div class="sc"><div class="sl"></div><div class="sa"></div></div>
+                    <span class="spill sp-canary">🐦 10% Canary</span>
+                    <div class="sc"><div class="sl"></div><div class="sa"></div></div>
+                    <span class="spill sp-canary">🐦 50% Canary</span>
+                    <div class="sc"><div class="sl"></div><div class="sa"></div></div>
+                    <span class="spill sp-stable">✅ 100% Stable</span>
+                </div>
+                <div style="font-size:0.5rem;color:#9ca3af;margin-top:8px;font-family:monospace;">Cloud Run Service</div>
+            </div>
+
+        </div>
+
+        <!-- PROMOTE LABELS -->
+        <div class="promote-row" style="max-width:700px;">
+            <div class="promote-cell"></div>
+            <div class="promote-cell">← manual promote →</div>
+            <div class="promote-cell">← manual promote →</div>
+        </div>
+
+        <!-- CONNECTOR to VPC -->
+        <div class="conn" style="margin-top:12px;">
+            <div class="conn-line" style="height:12px;"></div>
+            <div class="conn-text">all services connected via Serverless VPC Connector</div>
+            <div class="conn-line" style="height:8px;"></div>
+            <div class="conn-arrow"></div>
+        </div>
+
+        <!-- VPC -->
+        <div class="node t-vpc" style="max-width:500px;width:100%;padding:14px 20px;">
+            <div class="n-icon">🌐</div>
+            <div class="n-title">Private VPC Network</div>
+            <div class="n-sub">
+                Custom VPC · Private Subnet · Serverless VPC Connector<br>
+                All Cloud Run egress routes through private network
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+        <div class="li"><div class="ld" style="background:#22c55e;"></div> Live / Auto-deploy</div>
+        <div class="li"><div class="ld" style="background:#eab308;"></div> Manual Gate</div>
+        <div class="li"><div class="ld" style="background:#f43f5e;"></div> Approval Required</div>
+        <div class="li"><div class="ld" style="background:#a855f7;"></div> Canary Traffic Split</div>
+        <div class="li"><div class="ld" style="background:#6d28d9;"></div> Modular Terraform</div>
+        <div class="li"><div class="ld" style="background:#3b82f6;"></div> Cloud Build CI</div>
+        <div class="li"><div class="ld" style="background:#22d3ee;"></div> Private Networking</div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <div class="footer-left">
+            <span class="footer-badge">🤖 Built with Claude Code</span>
+            <span class="footer-badge">☁️ Google Cloud Platform</span>
+            <span class="footer-badge">🏗️ Infrastructure as Code</span>
+        </div>
+        <div class="footer-right">End-to-end CI/CD · Canary Deployments · Zero JSON Keys</div>
+    </div>
+
+</div>
+
+<!-- DOWNLOAD BUTTON -->
+<div class="btn-row">
+    <button class="dl-btn" onclick="downloadDiagram()">📥 Download as PNG</button>
+    <div class="dl-status" id="dl-status"></div>
+</div>
+
+<script>
+    async function downloadDiagram() {
+        const status = document.getElementById('dl-status');
+        status.textContent = '⏳ Generating PNG...';
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        script.onload = async () => {
+            try {
+                const card = document.getElementById('diagram-card');
+                const canvas = await html2canvas(card, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false
+                });
+                const link = document.createElement('a');
+                link.download = 'cicd-pipeline-linkedin.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                status.textContent = '✅ Downloaded! Ready to post on LinkedIn.';
+            } catch(e) {
+                status.textContent = '⚠️ Download failed — try a screenshot instead.';
+            }
+        };
+        script.onerror = () => {
+            status.textContent = '⚠️ Could not load library — take a screenshot of the card above.';
+        };
+        document.head.appendChild(script);
+    }
+</script>
+
+</body>
+</html>

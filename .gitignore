@@ -1,0 +1,6 @@
+.terraform/
+*.tfstate
+*.tfstate.backup
+# Only ignore tfvars in root (not environments/)
+*.auto.tfvars
+terraform.tfvars
