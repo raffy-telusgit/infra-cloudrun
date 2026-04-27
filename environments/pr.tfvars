@@ -3,7 +3,7 @@
 # Init:  terraform init -backend-config=environments/pr.backend.hcl
 
 project_id     = "raffy-pr-project"
-project_number = "PLACEHOLDER_PROJECT_NUMBER"  # TODO: update after project creation
+project_number = "PLACEHOLDER_PROJECT_NUMBER" # TODO: update after project creation
 region         = "northamerica-northeast1"
 github_owner   = "raffy-telusgit"
 tfstate_bucket = "raffy-pr-project-tfstate"
