@@ -1,0 +1,21 @@
+#!/bin/sh
+# Runs on every manual `git push` from infra-cloudrun.
+# Blocks the push if Terraform formatting or validation fails.
+
+set -e
+cd "$(git rev-parse --show-toplevel)"
+
+echo "[pre-push] Checking Terraform formatting..."
+terraform fmt -check -recursive || {
+  echo "[pre-push] BLOCKED: Unformatted .tf files found. Run \`terraform fmt -recursive\` to fix." >&2
+  exit 1
+}
+
+echo "[pre-push] Running terraform validate..."
+terraform init -backend=false -input=false -no-color -reconfigure > /dev/null 2>&1
+terraform validate -no-color || {
+  echo "[pre-push] BLOCKED: \`terraform validate\` failed. Fix the errors above." >&2
+  exit 1
+}
+
+echo "[pre-push] All Terraform checks passed."

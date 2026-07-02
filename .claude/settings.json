@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "env": {
+    "FUELIX_BASE_URL": "https://api.fuelix.ai/v1",
+    "FUELIX_MODEL": "claude-sonnet-4",
+    "NODE_USE_ENV_PROXY": "1"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:/Users/T768408/Documents/claude projects/cicdProject/infra-cloudrun/.claude/hooks/pre-push-check.js\"",
+            "timeout": 180,
+            "statusMessage": "Running pre-push FueliX review..."
+          }
+        ]
+      }
+    ]
+  }
+}
