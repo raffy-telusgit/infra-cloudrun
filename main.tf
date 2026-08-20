@@ -58,3 +58,11 @@ module "infra_triggers" {
   github_owner   = var.github_owner
   github_repo    = "infra-cloudrun"
 }
+
+module "issue_triage_agent" {
+  source = "./modules/issue-triage-agent"
+
+  project_id              = var.project_id
+  region                  = var.region
+  github_actions_sa_email = module.iam.service_account_email
+}
