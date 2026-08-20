@@ -3,12 +3,22 @@ variable "project_id" {
   type        = string
 }
 
+variable "project_number" {
+  description = "GCP project number"
+  type        = string
+}
+
 variable "region" {
   description = "GCP region"
   type        = string
 }
 
-variable "github_actions_sa_email" {
-  description = "Email of the GitHub Actions service account, granted run.invoker on this service"
+variable "github_owner" {
+  description = "GitHub repository owner"
+  type        = string
+}
+
+variable "github_repo" {
+  description = "GitHub repo name to watch for issue-triage trigger pushes"
   type        = string
 }

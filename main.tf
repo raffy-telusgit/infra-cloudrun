@@ -62,7 +62,9 @@ module "infra_triggers" {
 module "issue_triage_agent" {
   source = "./modules/issue-triage-agent"
 
-  project_id              = var.project_id
-  region                  = var.region
-  github_actions_sa_email = module.iam.service_account_email
+  project_id     = var.project_id
+  project_number = var.project_number
+  region         = var.region
+  github_owner   = var.github_owner
+  github_repo    = "${var.app_name}-app"
 }

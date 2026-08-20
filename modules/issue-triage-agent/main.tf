@@ -1,10 +1,14 @@
-resource "google_artifact_registry_repository" "issue_triage_agent" {
-  project       = var.project_id
-  location      = var.region
-  repository_id = "issue-triage-agent"
-  format        = "DOCKER"
-  description   = "Docker images for issue-triage-agent"
-}
+# Issue Triage Agent: Cloud Build relay.
+#
+# GitHub Actions (on `issues: labeled`) cannot authenticate to GCP in this
+# org (WIF pool creation is denied by org policy, and static SA keys are
+# not to be created either). So GitHub Actions never talks to GCP: it only
+# pushes a small trigger file to the `issue-triage` branch using its own
+# ambient github.token. That push fires this Cloud Build trigger (the same
+# GitHub-App-based mechanism already used for every other pipeline here),
+# and Cloud Build - already a trusted GCP identity - does the actual work:
+# read the KB docs from its own checkout, call FueliX, and post the GitHub
+# comment using a PAT stored in Secret Manager.
 
 resource "google_secret_manager_secret" "fuelix_api_key" {
   project   = var.project_id
@@ -15,60 +19,42 @@ resource "google_secret_manager_secret" "fuelix_api_key" {
   }
 }
 
-resource "google_service_account" "issue_triage_agent" {
-  project      = var.project_id
-  account_id   = "issue-triage-agent-sa"
-  display_name = "Issue Triage Agent Cloud Run Runtime"
+resource "google_secret_manager_secret" "github_token" {
+  project   = var.project_id
+  secret_id = "issue-triage-agent-github-token"
+
+  replication {
+    auto {}
+  }
 }
 
-resource "google_secret_manager_secret_iam_member" "issue_triage_agent_secret_accessor" {
+resource "google_secret_manager_secret_iam_member" "cloudbuild_fuelix_accessor" {
   project   = var.project_id
   secret_id = google_secret_manager_secret.fuelix_api_key.secret_id
   role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${google_service_account.issue_triage_agent.email}"
+  member    = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
 }
 
-resource "google_cloud_run_v2_service" "issue_triage_agent" {
+resource "google_secret_manager_secret_iam_member" "cloudbuild_github_token_accessor" {
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.github_token.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
+}
+
+resource "google_cloudbuild_trigger" "issue_triage" {
   project  = var.project_id
   name     = "issue-triage-agent"
   location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
 
-  template {
-    service_account = google_service_account.issue_triage_agent.email
+  github {
+    owner = var.github_owner
+    name  = var.github_repo
 
-    containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello:latest"
-
-      ports {
-        container_port = 8080
-      }
-
-      resources {
-        limits = {
-          cpu    = "1"
-          memory = "512Mi"
-        }
-      }
-    }
-
-    scaling {
-      min_instance_count = 0
-      max_instance_count = 2
+    push {
+      branch = "^issue-triage$"
     }
   }
 
-  lifecycle {
-    ignore_changes = [
-      template,
-    ]
-  }
-}
-
-resource "google_cloud_run_v2_service_iam_member" "github_actions_invoker" {
-  project  = var.project_id
-  location = var.region
-  name     = google_cloud_run_v2_service.issue_triage_agent.name
-  role     = "roles/run.invoker"
-  member   = "serviceAccount:${var.github_actions_sa_email}"
+  filename = "cloudbuild-issue-triage.yaml"
 }
