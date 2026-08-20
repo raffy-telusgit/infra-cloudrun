@@ -1,3 +1,11 @@
+resource "google_artifact_registry_repository" "issue_triage_agent" {
+  project       = var.project_id
+  location      = var.region
+  repository_id = "issue-triage-agent"
+  format        = "DOCKER"
+  description   = "Docker images for issue-triage-agent"
+}
+
 resource "google_secret_manager_secret" "fuelix_api_key" {
   project   = var.project_id
   secret_id = "issue-triage-agent-fuelix-api-key"
